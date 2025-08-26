@@ -5,6 +5,13 @@ import os
 import warnings
 from mmcv import Config
 from mmdet3d.datasets import build_dataset
+import sys
+from pathlib import Path
+
+project_root = (
+    Path(__file__).resolve().parents[2]
+)  # Adjust the num of parents as needed
+sys.path.append(str(project_root))
 from projects.mmdet3d_plugin.datasets.builder import build_dataloader
 from mmdet.datasets import replace_ImageToTensor
 import time
@@ -12,6 +19,7 @@ import os.path as osp
 import numpy as np
 import torch.nn as nn
 from scipy.optimize import linear_sum_assignment
+from scipy.spatial.transform import Rotation as R
 from mmdet3d.core.bbox import LiDARInstance3DBoxes
 from scipy.linalg import polar
 
@@ -25,6 +33,35 @@ def diff_label_filt(frame1, frame2, i, j):
         and diff[2] <= 1
         and frame1.label[i] == frame2.label[j]
     )
+
+
+def generate_drop_mask(num_lines, drop_prob=0.01):
+    """True: Drop OUT that line"""
+    return torch.rand(num_lines) < drop_prob
+
+
+def drop_boxes_by_mask(boxes, mask):
+    tensor = boxes.tensor
+    kept_tensor = tensor[~mask, :]
+    # rebuild LiDARInstance3DBoxes object
+    new_boxes = LiDARInstance3DBoxes(
+        kept_tensor, box_dim=kept_tensor.shape[-1], with_yaw=boxes.with_yaw
+    )
+    return new_boxes
+
+
+def addNoise(mat, loc_noise_std=0.2, ori_noise_std=0.2):
+    mat = mat.squeeze(0)
+    random_angles = np.random.normal(0, ori_noise_std, 3)
+    random_locs = np.random.normal(0, loc_noise_std, 3)
+    R_matrix = R.from_euler('xyz', random_angles, degrees=True).as_matrix()
+    # print(mat.shape)
+    # print(mat.size())
+    # print(mat)
+    mat[:3, :3] = torch.from_numpy(R_matrix.T) @ mat[:3, :3]
+    mat[3, :3] += torch.from_numpy(random_locs.T)
+    mat = mat.unsqueeze(0)
+    return mat
 
 
 class Bbox:
@@ -289,6 +326,7 @@ def parse_args():
 
 def main():
     args = parse_args()
+    cfg = Config.fromfile(args.config)
 
     print(f'Loading vehicle-side detection results from {args.veh_det_pkl}')
     veh_det_pkl = mmcv.load(args.veh_det_pkl)
@@ -301,6 +339,12 @@ def main():
     inf_res = inf_det_pkl['bbox_results']
     inf_res_dict = {}
     for i_res in inf_res:
+        # drop out bboxes randomly
+        num_lines = i_res['boxes_3d'].tensor.shape[0]
+        mask = generate_drop_mask(num_lines, drop_prob=cfg.drop_prob)
+        i_res['boxes_3d'] = drop_boxes_by_mask(i_res['boxes_3d'], mask)
+        i_res['scores_3d'] = i_res['scores_3d'][~mask]
+        i_res['labels_3d'] = i_res['labels_3d'][~mask]
         inf_res_dict[i_res['token']] = i_res
 
     assert len(veh_res) == len(
@@ -317,7 +361,6 @@ def main():
     curDirectory = os.getcwd()
     print(curDirectory)
 
-    cfg = Config.fromfile(args.config)
     # if args.cfg_options is not None:
     #     cfg.merge_from_dict(args.cfg_options)
 
@@ -421,6 +464,13 @@ def main():
         if args.debug:
             veh2inf_rt = torch.from_numpy(np.eye(4)).unsqueeze(0)
             inf_result = veh_result
+
+        # add Noise to the transformation matrix
+        veh2inf_rt = addNoise(
+            veh2inf_rt,
+            loc_noise_std=cfg.loc_noise_std,
+            ori_noise_std=cfg.orien_noise_std,
+        )
 
         late_fusion_result = late_fusion_model(veh_result, inf_result, veh2inf_rt)
         outputs['bbox_results'].append(

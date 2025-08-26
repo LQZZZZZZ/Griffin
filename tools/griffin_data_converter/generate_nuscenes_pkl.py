@@ -358,8 +358,8 @@ if __name__ == "__main__":
         )
 
     if args.delay:
-        # delay 200ms and 400ms
-        for delay_frame_num in [2, 4]:
+        # delay 100, 200, 300, 400ms
+        for delay_frame_num in [1, 2, 3, 4]:
             print(
                 f"Generating delay {delay_frame_num} frames info file for cooperative..."
             )

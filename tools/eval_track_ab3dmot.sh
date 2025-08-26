@@ -4,7 +4,7 @@ set -e  # Exit on error
 if [ "$#" -ne 2 ]; then
     echo "Error: Invalid number of arguments"
     echo "Usage: $0 <detection_pkl_path> <config_path>"
-    echo "Example: $0 projects/work_dirs_griffin_35scenes_40m_0216/vehicle-side/tiny_track_r50_stream_bs8_24epoch_3cls_coEval_smallRange/results-02171028.pkl projects/configs_griffin_35scenes_40m_0216/vehicle-side/tiny_track_r50_stream_bs8_24epoch_3cls_coEval_smallRange.py"
+    echo "Example: $0 projects/work_dirs_griffin_50scenes_25m/cooperative/tiny_track_r50_stream_bs1_3cls_late_fusion/results.pkl projects/configs_griffin_50scenes_25m/cooperative/tiny_track_r50_stream_bs1_3cls_late_fusion_ab3dmot.py"
     exit 1
 fi
 

@@ -3,7 +3,7 @@
 # Check if an argument was provided
 if [ $# -ne 1 ]; then
     echo "Usage: $0 <dataset_prefix>"
-    echo "Valid dataset_prefix values: griffin_50scenes_25m, griffin_50scenes_40m, griffin_100scenes_random"
+    echo "Valid dataset_prefix values: griffin_50scenes_25m, griffin_50scenes_40m, griffin_50scenes_55m, griffin_100scenes_random"
     exit 1
 fi
 
@@ -11,7 +11,7 @@ fi
 dataset_prefix=$1
 
 # Validate dataset_prefix
-valid_prefixes=("griffin_50scenes_25m" "griffin_50scenes_40m" "griffin_100scenes_random")
+valid_prefixes=("griffin_50scenes_25m" "griffin_50scenes_40m" "griffin_50scenes_55m" "griffin_100scenes_random")
 valid=0
 for prefix in "${valid_prefixes[@]}"; do
     if [ "$dataset_prefix" == "$prefix" ]; then
@@ -21,7 +21,7 @@ for prefix in "${valid_prefixes[@]}"; do
 done
 
 if [ $valid -eq 0 ]; then
-    echo "Error: Invalid dataset_prefix. Valid values are: griffin_50scenes_25m, griffin_50scenes_40m, griffin_100scenes_random"
+    echo "Error: Invalid dataset_prefix. Valid values are: griffin_50scenes_25m, griffin_50scenes_40m, griffin_50scenes_55m, griffin_100scenes_random"
     exit 1
 fi
 

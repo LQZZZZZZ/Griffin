@@ -656,6 +656,7 @@ class NuScenesEval_custom(NuScenesEval):
             print(
                 f"Warning: Pred boxes are less than gt boxes, filtering gt boxes, {len(self.pred_boxes.sample_tokens)} pred boxes, {len(self.gt_boxes.sample_tokens)} gt boxes"
             )
+            print(f"Warning: This should only happen in the latency evaluation")
             self.gt_boxes = filter_by_sample_token(
                 self.gt_boxes, self.pred_boxes.sample_tokens
             )

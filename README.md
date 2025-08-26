@@ -1,101 +1,163 @@
-# Griffin: Aerial-Ground Cooperative Detection and Tracking Dataset and Benchmark
+<div align="center">
 
-<h3 align="center">
-    <a href="https://arxiv.org/abs/2503.06983">📄 arXiv</a> |
-    <a href="https://github.com/wang-jh18-SVM/Griffin">🐙 GitHub</a> |
-    <a href="https://pan.baidu.com/s/1NDgsuHB-QPRiROV73NRU5g?pwd=u3cm">💾 Baidu Netdisk</a> |
-    <a href="https://huggingface.co/datasets/wjh-svm/Griffin">🤗 Hugging Face</a>
-</h3>
+# 🦅 Griffin
 
-![data_example](docs/figure/data_example.png)
+**A Pioneering Large-scale Dataset and Benchmark for Aerial-Ground Cooperative 3D Perception**
 
-**Griffin** is the pioneering publicly available dataset for aerial-ground cooperative 3D perception. Built using CARLA-AirSim co-simulation, it features over 200 dynamic scenes—totaling more than 30,000 frames and 270,000 images. With instance-aware occlusion quantification, variable UAV altitudes (20–60 meters), and realistic drone dynamics under diverse conditions, Griffin sets a new standard for cooperative perception research.
+[![arXiv](https://img.shields.io/badge/arXiv-2503.06983-b31b1b.svg)](https://arxiv.org/abs/2503.06983)
+[![Dataset](https://img.shields.io/badge/Dataset-Baidu%20Netdisk-blue)](https://pan.baidu.com/s/1NDgsuHB-QPRiROV73NRU5g?pwd=u3cm)
+[![Dataset](https://img.shields.io/badge/🤗-Hugging%20Face-yellow)](https://huggingface.co/datasets/wjh-svm/Griffin)
+[![GitHub](https://img.shields.io/github/stars/wang-jh18-SVM/Griffin?style=social)](https://github.com/wang-jh18-SVM/Griffin)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-![dataset_comparison](docs/figure/dataset_comparision.png)
-
----
-
-## News
-
-- 🚀 **(2025/3)** Released source code and pre-trained models for the **AGILE framework**—the first Aerial-Ground Instance-LEvel intermediate fusion framework.
-- 📦 **(2025/3)** Griffin V1.0 dataset is now available at [Baidu Netdisk](https://pan.baidu.com/s/1NDgsuHB-QPRiROV73NRU5g?pwd=u3cm) and [Hugging Face](https://huggingface.co/datasets/wjh-svm/Griffin).
-- 📝 **(2025/3)** Our paper is now available on [ArXiv](https://arxiv.org/abs/2503.06983).
+</div>
 
 ---
 
-## Getting Started
+## 🎯 What is Griffin?
 
-- [Installation](docs/Installation.md)
-- [Dataset Preparation](docs/Dataset_Preparation.md)
-- [Training and Evaluation](docs/Training_and_Evaluation.md)
-- [Visualization](docs/Visualization.md) [![Griffin Demo Video](docs/figure/label_visualization.png)](docs/video/Griffin_r1200_10fps_1_3Mbps.mp4)
+<div align="center">
+<img src="docs/figure/data_example.png" alt="Griffin Dataset Examples" width="90%">
+</div>
 
----
+**Griffin** is a pioneering publicly large-scale dataset specifically designed for aerial-ground cooperative 3D perception. Our dataset pushes the boundaries of multi-agent perception by combining aerial and ground-based viewpoints for enhanced 3D object detection and tracking.
 
-## Main Results
+### ✨ Key Features
 
-### Detection and tracking on Griffin-25m under various latency conditions
+- 🎬 **250+ Dynamic Scenes** with realistic traffic patterns
+- 📸 **37K Frames** and **340K High-quality Images**
+- 🎯 **Instance-aware Occlusion Analysis** for precise labels
+- ✈️ **Multi-altitude Drone Simulation** (20m-60m)
+- 🌍 **CARLA-AirSim Co-simulation** for photorealistic environments
+- 🎪 **Comprehensive Benchmarks** for detection and tracking
+- 📡 **Robustness Evaluation** under communication interference and localization errors
 
-| **Fusion Stage** | **Method** | **Latency (ms)** | **AP** ↑ | **ATE** ↓ | **AOE** ↓ | **AMOTA** ↑ | **AMOTP** ↓ | **MT** ↑ | **ML** ↓ | **IDS** ↓ | **Comm. Cost** ↓ |
-|------------------|------------|------------------|----------|-----------|-----------|-------------|-------------|----------|----------|-----------|------------------|
-| No Fusion        | -          | 0                | 0.366    | 0.398     | 0.492     | 0.363       | 1.295       | 16       | 49       | 5         | 0                |
-|                  |            |                  |          |           |           |             |             |          |          |           |                  |
-| Early Fusion     | Concat     | 0                | 0.626    | 0.385     | 0.795     | 0.653       | 0.869       | 34       | 16       | 38        | ~3×10⁸           |
-|                  |            | 200              | 0.510    | 0.502     | 0.776     | 0.561       | 1.044       | 25       | 21       | 34        |                  |
-|                  |            | 400              | 0.416    | 0.522     | 0.714     | 0.418       | 1.189       | 19       | 32       | 26        |                  |
-|                  |            |                  |          |           |           |             |             |          |          |           |                  |
-| Instance Fusion  | AGILE      | 0                | 0.412    | 0.484     | 0.708     | 0.435       | 1.130       | 21       | 35       | 23        | ~6×10⁵           |
-|                  |            | 200              | 0.396    | 0.484     | 0.705     | 0.410       | 1.165       | 16       | 36       | 20        |                  |
-|                  |            | 400              | 0.373    | 0.505     | 0.709     | 0.366       | 1.212       | 15       | 40       | 12        |                  |
-|                  |            |                  |          |           |           |             |             |          |          |           |                  |
-| Late Fusion      | Hungarian  | 0                | 0.377    | 0.357     | 0.511     | 0.369       | 1.078       | 14       | 55       | 16        | ~1×10⁴           |
-|                  |            | 200              | 0.363    | 0.362     | 0.498     | 0.357       | 1.060       | 15       | 55       | 11        |                  |
-|                  |            | 400              | 0.339    | 0.350     | 0.458     | 0.310       | 1.129       | 15       | 58       | 11        |                  |
+<div align="center">
+<img src="docs/figure/dataset_comparison.png" alt="Dataset Comparison" width="90%">
+</div>
 
-### Performance Across UAV Altitudes
+## 📋 Table of Contents
 
-| **Dataset**    | **Fusion Stage** | **AP**         | **AMOTA**      |
-|----------------|------------------|----------------|----------------|
-| Griffin-25m    | No Fusion        | 0.366          | 0.363          |
-|                | Early Fusion     | 0.626 (+71.0%) | 0.653 (+79.9%) |
-|                | Instance Fusion  | 0.412 (+12.6%) | 0.435 (+19.8%) |
-|                | Late Fusion      | 0.377 (+3.0%)  | 0.369 (+1.7%)  |
-|                |                  |                |                |
-| Griffin-40m    | No Fusion        | 0.351          | 0.371          |
-|                | Early Fusion     | 0.495 (+41.0%) | 0.543 (+46.4%) |
-|                | Instance Fusion  | 0.359 (+2.3%)  | 0.397 (+7.0%)  |
-|                | Late Fusion      | 0.354 (+0.9%)  | 0.387 (+4.3%)  |
-|                |                  |                |                |
-| Griffin-Random | No Fusion        | 0.465          | 0.491          |
-|                | Early Fusion     | 0.580 (+24.7%) | 0.646 (+31.6%) |
-|                | Instance Fusion  | 0.408 (-12.3%) | 0.426 (-13.2%) |
-|                | Late Fusion      | 0.375 (-19.4%) | 0.394 (-19.8%) |
-
-Detailed results with all metrics are lised in [docs/detailed_results.csv](docs/detailed_results.csv).
+- [🦅 Griffin](#-griffin)
+  - [🎯 What is Griffin?](#-what-is-griffin)
+    - [✨ Key Features](#-key-features)
+  - [📋 Table of Contents](#-table-of-contents)
+  - [🔥 Latest News](#-latest-news)
+  - [📚 Documentation](#-documentation)
+  - [📈 Main Results](#-main-results)
+    - [🎯 Baseline Performance](#-baseline-performance)
+    - [🌐 Communication Robustness](#-communication-robustness)
+    - [📍 Localization Robustness](#-localization-robustness)
+    - [🏆 Key Insights](#-key-insights)
+  - [📝 Citation](#-citation)
+  - [🙏 Acknowledgements](#-acknowledgements)
 
 ---
 
-## Citation
+## 🔥 Latest News
 
-If you find Griffin useful, please consider giving a ⭐ and citing our work:
+> 🚨 **Stay updated with the latest developments in Griffin!**
+
+| Date       | Update                      | Description                                                                                                                                                                          |
+| ---------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **2025/8** | 🔧 **Robustness Evaluation** | Testing configurations for localization errors, communication latency, and packet loss are now available                                                                             |
+| **2025/7** | 📊 **Griffin-55m Subset**    | New subset Griffin-55m and corresponding model checkpoints are released                                                                                                              |
+| **2025/3** | 🤖 **UniV2X Models**         | Released reimplementation code and pre-trained models for UniV2X                                                                                                                     |
+| **2025/3** | 💾 **Dataset V1.0**          | Griffin V1.0 dataset is available on [Baidu Netdisk](https://pan.baidu.com/s/1NDgsuHB-QPRiROV73NRU5g?pwd=u3cm) and [🤗 Hugging Face](https://huggingface.co/datasets/wjh-svm/Griffin) |
+| **2025/3** | 📄 **Paper Published**       | Our paper is now available on [ArXiv](https://arxiv.org/abs/2503.06983)                                                                                                              |
+
+---
+
+## 📚 Documentation
+
+Comprehensive guides to help you get the most out of Griffin:
+
+| Guide                       | Description                             | Link                                                               |
+| --------------------------- | --------------------------------------- | ------------------------------------------------------------------ |
+| 🛠️ **Installation**          | Step-by-step setup instructions         | [docs/Installation.md](docs/Installation.md)                       |
+| 📊 **Dataset Preparation**   | How to download and organize the data   | [docs/Dataset_Preparation.md](docs/Dataset_Preparation.md)         |
+| 🏃‍♂️ **Training & Evaluation** | Run experiments and evaluate models     | [docs/Training_and_Evaluation.md](docs/Training_and_Evaluation.md) |
+| 🎨 **Visualization**         | Visualize results and debug your models | [docs/Visualization.md](docs/Visualization.md)                     |
+
+---
+
+## 📈 Main Results
+
+Griffin provides comprehensive benchmarks across multiple models and challenging scenarios. Our evaluation covers detection and multi-object tracking metrics under various conditions.
+
+### 🎯 Baseline Performance
+
+The AP and AMOTA metrics of every baseline among different subsets are shown below. For detailed results with all metrics, see [📊 detailed_results.csv](docs/detailed_results.csv).
+
+<div align="center">
+<img src="docs/figure/model_performance.png" alt="Model Performance Comparison" width="95%">
+</div>
+
+### 🌐 Communication Robustness
+
+<div align="center">
+<img src="docs/figure/robustness_communication.png" alt="Communication Robustness" width="95%">
+</div>
+
+### 📍 Localization Robustness  
+
+<div align="center">
+<img src="docs/figure/robustness_localization.png" alt="Localization Robustness" width="95%">
+</div>
+
+### 🏆 Key Insights
+
+- **🤝 Cooperative Potential**: In favorable conditions, cooperative methods achieve substantial performance gains over single-agent baselines by resolving occlusions and expanding the effective field-of-view
+- **✈️ Altitude Sensitivity**: Strong sensitivity to drone flight altitude affects performance, with instance-level fusion strategies proving more resilient to perspective shifts than dense BEV-level approaches
+- **🎯 Adaptive Filtering**: Resilience to localization errors is directly linked to adaptive data filtering—methods with selective fusion (instance-level filtering or spatial confidence maps) demonstrate superior robustness
+- **🔮 Future Directions**: Research should focus on altitude-adaptive fusion mechanisms, sparse communication-efficient methods, and dynamic trust mechanisms for reliable real-world deployment
+
+---
+
+## 📝 Citation
+
+If you find Griffin useful for your research, please consider giving us a ⭐ and citing our work:
+
 ```bibtex
 @misc{wang2025griffinaerialgroundcooperativedetection,
-      title={Griffin: Aerial-Ground Cooperative Detection and Tracking Dataset and Benchmark}, 
+      title={Griffin: Aerial-Ground Cooperative Detection and Tracking Dataset and Benchmark},
       author={Jiahao Wang and Xiangyu Cao and Jiaru Zhong and Yuner Zhang and Haibao Yu and Lei He and Shaobing Xu},
       year={2025},
       eprint={2503.06983},
       archivePrefix={arXiv},
       primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2503.06983}, 
+      url={https://arxiv.org/abs/2503.06983},
 }
 ```
 
 ---
 
-## Acknowledgement
+## 🙏 Acknowledgements
 
-We're grateful to these amazing open-source projects:
-- [mmdet3d](https://github.com/open-mmlab/mmdetection3d): Core 3D detection framework.
-- [UniV2X](https://github.com/AIR-THU/UniV2X): Cooperative perception inspiration (ours).
-- [BEVFormer](https://github.com/fundamentalvision/BEVFormer): 3D object detection baseline.
-- [AB3DMOT](https://github.com/xinshuoweng/AB3DMOT): 3D multi-object tracking baseline.
+We extend our heartfelt gratitude to the amazing open-source community and these outstanding projects that made Griffin possible:
+
+<div align="center">
+
+| Project             | Contribution                                         | Link                                                     |
+| ------------------- | ---------------------------------------------------- | -------------------------------------------------------- |
+| 🔧 **MMDetection3D** | Core 3D detection framework and infrastructure       | [GitHub](https://github.com/open-mmlab/mmdetection3d)    |
+| 🤝 **UniV2X**        | Cooperative perception methodologies and inspiration | [GitHub](https://github.com/AIR-THU/UniV2X)              |
+| 🚗 **BEVFormer**     | Bird's-eye-view 3D object detection baseline         | [GitHub](https://github.com/fundamentalvision/BEVFormer) |
+| 🎯 **AB3DMOT**       | 3D multi-object tracking algorithms and evaluation   | [GitHub](https://github.com/xinshuoweng/AB3DMOT)         |
+
+</div>
+
+---
+
+<div align="center">
+
+**Star ⭐ this repository if you found it helpful!**
+
+<p>
+<img src="https://img.shields.io/github/stars/wang-jh18-SVM/Griffin?style=social" alt="GitHub stars">
+<img src="https://img.shields.io/github/forks/wang-jh18-SVM/Griffin?style=social" alt="GitHub forks">
+</p>
+
+*Made with ❤️ by the Griffin team*
+
+</div>

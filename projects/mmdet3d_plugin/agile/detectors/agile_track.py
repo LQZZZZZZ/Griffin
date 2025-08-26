@@ -167,17 +167,15 @@ class AgileTrack(MVXTwoStageDetector):
         self.bev_h, self.bev_w = self.pts_bbox_head.bev_h, self.pts_bbox_head.bev_w
         self.freeze_bev_encoder = freeze_bev_encoder
 
-        # cross-agent query interaction
+        # cross-agent interaction
         self.is_cooperation = is_cooperation
         if self.is_cooperation:
+            # For Instance Fusion
             self.cross_agent_query_interaction = CrossAgentSparseInteraction(
                 pc_range=self.pc_range,
                 inf_pc_range=self.inf_pc_range,
                 embed_dims=self.embed_dims,
             )
-            # self.cross_agent_query_interaction_coop = CrossAgentSparseInteractionCoop(pc_range=self.pc_range,
-            #                                                                     inf_pc_range=self.inf_pc_range,
-            #                                                                         embed_dims=self.embed_dims)
         self.drop_rate = drop_rate
 
         self.save_track_query = save_track_query
@@ -537,7 +535,7 @@ class AgileTrack(MVXTwoStageDetector):
         gt_bboxes_3d=None,
         gt_labels_3d=None,
         gt_inds=None,
-        **kwargs
+        **kwargs,
     ):
         """
         Perform forward only on one frame. Called in  forward_train
@@ -894,7 +892,7 @@ class AgileTrack(MVXTwoStageDetector):
         img_metas,
         timestamp,
         veh2inf_rt,
-        **kwargs
+        **kwargs,
     ):
         """Forward funciton
         Args:
@@ -1005,7 +1003,7 @@ class AgileTrack(MVXTwoStageDetector):
             gt_bboxes_3d=gt_bboxes_3d,  # lidar coord
             gt_labels_3d=gt_labels_3d,
             gt_inds=gt_inds,
-            **kwargs
+            **kwargs,
         )
         # all_query_embeddings: len=dec nums, N*256
         # all_matched_idxes: len=dec nums, N*2
@@ -1082,7 +1080,7 @@ class AgileTrack(MVXTwoStageDetector):
         l2g_t2=None,
         time_delta=None,
         veh2inf_rt=None,
-        **kwargs
+        **kwargs,
     ):
         """
         img: B, num_cam, C, H, W = img.shape
@@ -1195,7 +1193,7 @@ class AgileTrack(MVXTwoStageDetector):
         img_metas=None,
         timestamp=None,
         veh2inf_rt=None,
-        **kwargs
+        **kwargs,
     ):
         """only support bs=1 and sequential input"""
 
@@ -1251,7 +1249,7 @@ class AgileTrack(MVXTwoStageDetector):
             l2g_t2,
             time_delta,
             veh2inf_rt,
-            **kwargs
+            **kwargs,
         )
 
         self.prev_bev = frame_res["bev_embed"]
@@ -1276,11 +1274,10 @@ class AgileTrack(MVXTwoStageDetector):
 
         ## UniV2X: inf_track_query
         if self.save_track_query:
-            tensor_to_cpu = torch.zeros(1)
             save_path = os.path.join(
                 self.save_track_query_file_root, img_metas[0]['sample_idx'] + '.pkl'
             )
-            track_instances = track_instances.to(tensor_to_cpu)
+            track_instances = track_instances.to('cpu')
             mmcv.dump(track_instances, save_path)
 
         results = self._det_instances2results(

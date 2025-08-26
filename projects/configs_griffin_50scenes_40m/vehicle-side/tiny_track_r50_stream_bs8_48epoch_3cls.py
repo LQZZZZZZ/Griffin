@@ -449,7 +449,7 @@ log_config = dict(
         dict(
             type='WandbLoggerHook',
             init_kwargs=dict(
-                project='v2xtrack',
+                project='griffin',
                 name=f'{dataset_prefix}_{v2x_side}_tiny_r50_bs{batch_size}x{num_gpus}_{num_epochs}e_3cls',
             ),
         ),

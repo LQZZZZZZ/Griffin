@@ -1,5 +1,7 @@
 import numpy as np
 from numpy import random
+from scipy.spatial.transform import Rotation as R
+import torch
 import mmcv
 from mmdet.datasets.builder import PIPELINES
 from mmcv.parallel import DataContainer as DC
@@ -94,6 +96,97 @@ class NormalizeMultiviewImage(object):
     def __repr__(self):
         repr_str = self.__class__.__name__
         repr_str += f'(mean={self.mean}, std={self.std}, to_rgb={self.to_rgb})'
+        return repr_str
+
+@PIPELINES.register_module()
+class AddNoise(object):
+    """Add noise to the location and orientation of the vehicle relative to the drone/cam.
+    Args:
+        loc_noise_std (float): Standard deviation of the noise added to the
+            location of the vehicle.
+        ori_noise_std (float): Standard deviation of the noise added to the
+            orientation of the vehicle.
+    """
+
+    def __init__(
+        self, loc_noise_std=0.2, ori_noise_std=0.2, fusion_mode='instance_fusion'
+    ):
+        self.loc_noise_std = loc_noise_std
+        self.ori_noise_std = ori_noise_std
+        self.fusion_mode = fusion_mode
+
+    def __call__(self, results):
+        """Call function to add noise to locations.
+        Args:
+            results (dict): Result dict from loading pipeline.
+        Returns:
+            dict: Updated result dict with noisy locations.
+        """
+
+        if self.fusion_mode == 'instance_fusion' or self.fusion_mode == 'bev_fusion':
+            random_angles = np.random.normal(0, self.ori_noise_std, 3)
+            random_locs = np.random.normal(0, self.loc_noise_std, 3)
+            R_matrix = R.from_euler('xyz', random_angles, degrees=True).as_matrix()
+            results['veh2inf_rt'][:3, :3] = R_matrix.T @ results['veh2inf_rt'][:3, :3]
+            results['veh2inf_rt'][3, :3] += random_locs.T
+            # mat = results['veh2inf_rt'].T
+            # noise_matrix = np.vstack((np.hstack((R_matrix, random_locs.reshape(3, 1))), [0, 0, 0, 1]))
+            # mat = noise_matrix @ mat
+            # results['veh2inf_rt'] = mat.T
+        elif self.fusion_mode == 'early_fusion':
+            for i in range(4, 9):
+                random_angles = np.random.normal(0, self.ori_noise_std, 3)
+                random_locs = np.random.normal(0, self.loc_noise_std, 3)
+                R_matrix = R.from_euler('xyz', random_angles, degrees=True).as_matrix()
+                results['lidar2cam'][i][:3, :3] = results['lidar2cam'][i][:3, :3] @ R_matrix
+                results['lidar2img'][i][:3, :3] = results['lidar2img'][i][:3, :3] @ R_matrix
+                results['lidar2cam'][i][:3, 3] += random_locs
+                results['lidar2img'][i][:3, 3] += random_locs
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += f'(noise_std={self.noise_std})'
+        return repr_str
+
+@PIPELINES.register_module()
+class DropOutInf(object):
+    """Dropout the drone file lines/images with a certain probability.
+    Args:
+        drop_prob (float): Probability of dropping out a certain line/image.
+    """
+
+    def __init__(self, drop_prob=0.01, fusion_mode='instance_fusion'):
+        self.drop_prob = drop_prob
+        self.fusion_mode = fusion_mode
+
+    def __call__(self, results):
+        """Call function to dropout data.
+        Args:
+            results (dict): Result dict from loading pipeline.
+        Returns:
+            dict: Updated result dict with dropped out data.
+        """
+        if self.fusion_mode == 'instance_fusion':
+            num_rows = results['query_feats'].size(0)
+            mask = torch.rand(num_rows) < self.drop_prob
+            if mask.sum() > 0:
+                results['query_feats'] = results['query_feats'][~mask,:]
+                results['query_embeds'] = results['query_embeds'][~mask,:]
+                results['obj_idxes'] = results['obj_idxes'][~mask]
+                results['ref_pts'] = results['ref_pts'][~mask,:]
+        elif self.fusion_mode == 'early_fusion':
+            for img in results['img'][4:]:
+                if random.random() < self.drop_prob:
+                    img.fill(0)
+        elif self.fusion_mode == 'bev_fusion':
+            if random.random() < self.drop_prob:
+                results['inf_bev'].fill_(0)
+        return results
+
+    def __repr__(self):
+        repr_str = self.__class__.__name__
+        repr_str += f'(drop_prob={self.drop_prob})'
         return repr_str
 
 
@@ -197,7 +290,6 @@ class PhotoMetricDistortionMultiViewImage:
         return repr_str
 
 
-
 @PIPELINES.register_module()
 class CustomCollect3D(object):
     """Collect data from the loader relevant to the specific task.
@@ -283,7 +375,6 @@ class CustomCollect3D(object):
         """str: Return a string that describes the module."""
         return self.__class__.__name__ + \
             f'(keys={self.keys}, meta_keys={self.meta_keys})'
-
 
 
 @PIPELINES.register_module()

@@ -56,10 +56,10 @@ train_gt_iou_threshold = 0.3
 air_pc_range = [
     -51.2,
     -51.2,
-    -50,
+    -70,
     51.2,
     51.2,
-    -35,
+    -15,
 ]  # * usually different for every dataset
 is_track_cooperation = True
 read_track_query_file_root = f'./data/infos/{dataset_prefix}/drone-side/track_query/'
@@ -549,7 +549,7 @@ log_level = 'INFO'
 checkpoint_config = dict(interval=num_iters_per_epoch, max_keep_ckpts=3)
 
 work_dir = None
-load_from = f"projects/work_dirs_{dataset_prefix}/vehicle-side/tiny_track_r50_stream_bs8_48epoch_3cls/latest.pth"  # * Different for every dataset
+load_from = f"projects/work_dirs_{dataset_prefix}/vehicle-side/tiny_track_r50_stream_bs8_24epoch_3cls/latest.pth"  # * Different for every dataset
 resume_from = None
 
 find_unused_parameters = True

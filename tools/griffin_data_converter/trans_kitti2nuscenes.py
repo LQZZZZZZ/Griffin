@@ -1153,6 +1153,38 @@ class GriffinKittiToNuScenesConverter:
         print("Saving metadata...")
         self.save_metadata()
 
+def gen_split_file(
+    nusc,
+    split_file: str,
+    split_ratio: List[float] = [0.8, 0.2],
+    debug_all_train: bool = False,
+):
+    """Generate split file based on scene metadata"""
+    print("Generating split file...")
+    if debug_all_train:
+        train_scenes = [scene['name'] for scene in nusc.scene]
+        val_scenes = [scene['name'] for scene in nusc.scene]
+    else:
+        scene_names = [scene['name'] for scene in nusc.scene]
+        random.shuffle(scene_names)
+
+        train_num = int(len(scene_names) * split_ratio[0])
+        train_scenes = scene_names[:train_num]
+        val_scenes = scene_names[train_num:]
+    print(f"Train scenes: {len(train_scenes)}, Val scenes: {len(val_scenes)}")
+
+    split_data = {
+        "batch_split": {
+            "train": train_scenes,
+            "val": val_scenes,
+        }
+    }
+
+    print(f"Saving split file to {split_file}...")
+    os.makedirs(os.path.dirname(split_file), exist_ok=True)
+    with open(split_file, 'w') as f:
+        json.dump(split_data, f, indent=4)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -1209,6 +1241,15 @@ if __name__ == "__main__":
         side="vehicle",
     )
     vehicle_converter.convert(invalid_frames)
+
+    # # Deprecated, only for developers to generate the split file
+    # # Normal users should directly use the split file from github repo
+    # coop_nusc = NuScenes(
+    #     version="v1.0-trainval",
+    #     dataroot=os.path.join(args.target_dir, "cooperative"),
+    #     verbose=True,
+    # )
+    # gen_split_file(coop_nusc, args.split_file)
 
     cooperative_converter.verify_split_scenes(args.split_file)
     drone_converter.verify_split_scenes(args.split_file)

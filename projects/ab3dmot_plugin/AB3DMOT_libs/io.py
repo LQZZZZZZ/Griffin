@@ -2,8 +2,12 @@
 # email: xinshuo.weng@gmail.com
 
 import warnings, numpy as np, os
-from xinshuo_io import mkdir_if_missing, load_txt_file, save_txt_file
-
+try:
+    from xinshuo_io import mkdir_if_missing, load_txt_file, save_txt_file
+except ImportError:
+    raise ImportError(
+        'AB3DMOT is not installed correctly, please follow the installation guide in docs/Installation.md'
+    )
 
 ################## loading
 

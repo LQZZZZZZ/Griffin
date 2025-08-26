@@ -190,13 +190,13 @@ def render_bev_view(
 
         # Select box color based on class or tracking ID
         if hasattr(box_global, 'tracking_name'):
-            # Use class-based coloring
-            c = get_box_color(box_global.tracking_name, is_gt=is_gt)
-            box.render(ax, view=np.eye(4), colors=(c, c, c), linewidth=linewidth)
-        else:
-            # Fallback to tracking ID based coloring
+            # Use tracking ID based coloring
             tr_id = box_global.tracking_id
             c = id_colors[tr_id % len(id_colors)]
+            box.render(ax, view=np.eye(4), colors=(c, c, c), linewidth=linewidth)
+        else:
+            # Fallback to class-based coloring
+            c = get_box_color(box_global.tracking_name, is_gt=is_gt)
             box.render(ax, view=np.eye(4), colors=(c, c, c), linewidth=linewidth)
 
     # Limit visible range
@@ -495,7 +495,7 @@ def to_video(folder_path, out_path, fps=4, downsample=1):
                 try:
                     # Create video writer and write frames
                     out = cv2.VideoWriter(
-                        out_path, cv2.VideoWriter_fourcc(*'DIVX'), fps, size
+                        out_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, size
                     )
                     for i in range(len(img_array)):
                         out.write(img_array[i])
@@ -580,7 +580,7 @@ def main():
     # Define video path
     video_path = os.path.join(
         args.out_folder,
-        f'{os.path.basename(args.out_folder)}.avi',
+        f'{os.path.basename(args.out_folder)}.mp4',
     )
 
     # Load prediction results if provided

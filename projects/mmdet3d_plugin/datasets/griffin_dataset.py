@@ -65,6 +65,7 @@ class GriffinDataset(NuScenesDataset):
         file_client_args=dict(backend='disk'),
         split_datas_file="",
         v2x_side='',
+        drone_only_bottom=False,
         class_range=None,
         new_range_100=False,
         enbale_temporal_aug=False,
@@ -112,7 +113,12 @@ class GriffinDataset(NuScenesDataset):
             self.num_each_seq = num_each_seq
             self._set_sequence_group_flag()
         self.record = []  # for clean data infos
+
         self.inf_keys = inf_keys
+        if self.v2x_side == 'drone-side' and drone_only_bottom:
+            self.drone_only_bottom = True
+        else:
+            self.drone_only_bottom = False
 
     def _set_sequence_group_flag(self):
         """
@@ -491,9 +497,8 @@ class GriffinDataset(NuScenesDataset):
             lidar2cam_rts = []
             cam_intrinsics = []
             for cam_type, cam_info in info['cams'].items():
-                # #! Only use bottom camera for debug
-                # if cam_type != 'CAM_BOTTOM':
-                #     continue
+                if self.drone_only_bottom and cam_type != 'CAM_BOTTOM':
+                    continue
 
                 image_paths.append(cam_info['data_path'])
 
