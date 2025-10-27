@@ -280,7 +280,9 @@ model = dict(
 file_client_args = dict(backend="disk")
 
 dataset_type = "GriffinDataset"
-data_root = f"./datasets/{dataset_prefix}/griffin-nuscenes/{v2x_side}/"
+# data_root = f"./datasets/{dataset_prefix}/griffin-nuscenes/{v2x_side}/"
+
+data_root = f"/data2/liqizhe/griffin_dataset/griffin25m/{dataset_prefix}/griffin-nuscenes/cooperative/"
 info_root = f"./data/infos/{dataset_prefix}/{v2x_side}/"
 ann_file_train = info_root + "griffin_infos_train.pkl"
 ann_file_val = info_root + "griffin_infos_val.pkl"

@@ -29,14 +29,14 @@ echo "Using dataset_prefix: $dataset_prefix"
 
 # convert kitti format to nuscenes format
 python tools/griffin_data_converter/trans_kitti2nuscenes.py \
-    --source_dir datasets/${dataset_prefix}/griffin-release \
-    --target_dir datasets/${dataset_prefix}/griffin-nuscenes \
+    --source_dir /data2/liqizhe/griffin_dataset/griffin25m/${dataset_prefix}/griffin-release\
+    --target_dir /data2/liqizhe/griffin_dataset/griffin25m/${dataset_prefix}/griffin-nuscenes \
     --split_file data/split_datas/${dataset_prefix}.json \
     --early_fusion
 
 # generate data info pkl files
 python tools/griffin_data_converter/generate_nuscenes_pkl.py \
-    --root_path datasets/${dataset_prefix}/griffin-nuscenes \
+    --root_path /data2/liqizhe/griffin_dataset/griffin25m/${dataset_prefix}/griffin-nuscenes \
     --out_path data/infos/${dataset_prefix} \
     --split_file data/split_datas/${dataset_prefix}.json \
     --early_fusion \
